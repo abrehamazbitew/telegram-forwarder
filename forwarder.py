@@ -8,25 +8,21 @@ client = TelegramClient('telegram_session', api_id, api_hash)
 
 @client.on(events.NewMessage(chats='ffddnju'))
 async def handler(event):
-    text = event.raw_text or ''
-    # ጽሑፍ እና ሊንኮች መቀየሪያ
-    text = text.replace('@ffddnju', '@abrehamazbitew')
-    text = text.replace('https://t.me/ffddnju', 'https://t.me/abrehamazbitew')
-    
     try:
-        if event.media:
-            await client.send_file('abrehamazbitew', event.media, caption=text)
+        text = event.message.text or ""
+        text = text.replace("@ffddnju", "@abrehamazbitew")
+        
+        if event.message.media:
+            await client.send_file('abrehamazbitew', event.message.media, caption=text)
         elif text:
             await client.send_message('abrehamazbitew', text)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error forwarding message: {e}")
 
 async def main():
-    await client.start()
-    print("Forwarder Started Successfully!")
+    print("Bot is running on Render 24/7...")
     await client.run_until_disconnected()
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
-
+    with client:
+        client.loop.run_until_complete(main())
