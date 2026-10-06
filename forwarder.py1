@@ -1,0 +1,49 @@
+import os
+import asyncio
+from threading import Thread
+from flask import Flask
+from telethon import TelegramClient, events
+
+# Render የፖርት ቦይንዲንግ ችግርን ለመፍታት ቀላል Web Server
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Telegram Forwarder is running 24/7!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
+
+# ቴሌግራም ቦት ኮድ
+api_id = 35209658
+api_hash = 'c795e2be9ef3057488fc6f21105a5f29'
+
+client = TelegramClient('telegram_session', api_id, api_hash)
+
+@client.on(events.NewMessage(chats='ffddnju'))
+async def handler(event):
+    try:
+        text = event.message.text or ""
+        text = text.replace("@ffddnju", "@abrehamazbitew")
+        
+        if event.message.media:
+            await client.send_file('abrehamazbitew', event.message.media, caption=text)
+        elif text:
+            await client.send_message('abrehamazbitew', text)
+    except Exception as e:
+        print(f"Error forwarding message: {e}")
+
+async def main():
+    print("Bot is running...")
+    await client.run_until_disconnected()
+
+if __name__ == '__main__':
+    # ዌብ ሰርቨሩን በጀርባ ማስነሳት
+    server_thread = Thread(target=run_flask)
+    server_thread.daemon = True
+    server_thread.start()
+    
+    # ቴሌግራም ቦቱን ማስነሳት
+    with client:
+        client.loop.run_until_complete(main())
